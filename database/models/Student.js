@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const db = require('../database');
+const db = require('../conn');
 
 const Student = db.define('student', {
   id: {
@@ -22,7 +22,7 @@ const Student = db.define('student', {
       isEmail: true
     }
   },
-  GPA: {
+  gpa: {
     type: Sequelize.DECIMAL
   }
 });
