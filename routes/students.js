@@ -15,7 +15,12 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   try {
-    res.send(await Student.findByPk(req.params.id));
+    const student = await Student.findByPk(req.params.id);
+    if (!student) {
+      res.sendStatus(404);
+    } else {
+      res.json(student);
+    }
   } catch (ex) {
     next(ex);
   }
@@ -33,6 +38,19 @@ router.post('/', async (req, res, next) => {
     });
     school.save();
     res.json(student);
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+router.delete('/:id', async (req, res, next) => {
+  try {
+    await Student.destroy({
+      where: {
+        id: req.params.id
+      }
+    });
+    res.sendStatus(204);
   } catch (ex) {
     next(ex);
   }
