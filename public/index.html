@@ -1,6 +1,19 @@
 <html>
   <head>
-    <style></style>
+    <style>
+      a {
+        margin-right: 20px;
+      }
+      #navbar {
+        background-color: dodgerblue;
+        color: white;
+        padding: 1.5em;
+        font-size: 20px;
+      }
+      #navbar > a {
+        color: white;
+      }
+    </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <script
@@ -24,7 +37,6 @@
       const { HashRouter, Route, Link, NavLink } = ReactRouterDOM;
       const { createStore, applyMiddleware } = Redux;
       const { Provider, connect } = ReactRedux;
-      const { thunkMiddleware } = ReduxThunk;
 
       //////////////////////////////////////////////////////////////////////////
 
@@ -89,32 +101,30 @@
       };
 
       // create redux store
-      const store = createStore(
-        reducer,
-        Redux.applyMiddleware(ReduxThunk.default)
-      );
+      const store = createStore(reducer, applyMiddleware(ReduxThunk.default));
 
       //////////////////////////////////////////////////////////////////////////
       // time for react
       const _NavBar = ({ schools, students }) => {
         const { pathname } = location;
+        const activeStyle = {
+          fontWeight: 'bold',
+          color: 'white',
+          textDecoration: 'none'
+        };
         return (
-          <div>
-            <Link to="/" style={{ fontWeight: pathname === '/' ? 'bold' : '' }}>
-              ACME Schools
-            </Link>{' '}
-            <Link
-              to="/schools"
-              style={{ fontWeight: pathname === '/things' ? 'bold' : '' }}
-            >
+          <div id="navbar">
+            <span style={{ fontSize: '35px', marginRight: '4em' }}>
+              <NavLink to="/" activeStyle={activeStyle}>
+                ACME Schools
+              </NavLink>
+            </span>
+            <NavLink to="/schools" activeStyle={activeStyle}>
               Schools ({schools.length})
-            </Link>
-            <Link
-              to="/students"
-              style={{ fontWeight: pathname === '/things' ? 'bold' : '' }}
-            >
+            </NavLink>
+            <NavLink to="/students" activeStyle={activeStyle}>
               Students ({students.length})
-            </Link>
+            </NavLink>
           </div>
         );
       };
