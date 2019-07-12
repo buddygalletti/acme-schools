@@ -29,6 +29,23 @@
       //////////////////////////////////////////////////////////////////////////
 
       // define some constants here
+      const GET_SCHOOLS = 'GET_SCHOOLS';
+      const GET_STUDENTS = 'GET_STUDENTS';
+
+      // action creators
+      const _getSchools = schools => {
+        return {
+          type: GET_SCHOOLS,
+          schools
+        };
+      };
+
+      const _getStudents = students => {
+        return {
+          type: GET_STUDENTS,
+          students
+        };
+      };
 
       // create redux initial state
       const initialState = {
@@ -38,21 +55,109 @@
         student: {}
       };
 
+      // thunks
+      const getSchools = () => {
+        return async dispatch => {
+          const response = await axios.get(`/api/schools/`);
+          dispatch(_getSchools(response.data));
+        };
+      };
+
+      const getStudents = () => {
+        return async dispatch => {
+          const response = await axios.get(`/api/students/`);
+          dispatch(_getStudents(response.data));
+        };
+      };
+
       // main reducer, think about using combine reducer later
       const reducer = (state = initialState, action) => {
         switch (action.type) {
+          case GET_SCHOOLS:
+            return {
+              ...state,
+              schools: action.schools
+            };
+          case GET_STUDENTS:
+            return {
+              ...state,
+              students: action.students
+            };
           default:
             return state;
         }
       };
 
       // create redux store
-      const store = createStore(reducer);
+      const store = createStore(
+        reducer,
+        Redux.applyMiddleware(ReduxThunk.default)
+      );
 
       //////////////////////////////////////////////////////////////////////////
+      // time for react
+      const _NavBar = ({ schools, students }) => {
+        const { pathname } = location;
+        return (
+          <div>
+            <Link to="/" style={{ fontWeight: pathname === '/' ? 'bold' : '' }}>
+              ACME Schools
+            </Link>{' '}
+            <Link
+              to="/schools"
+              style={{ fontWeight: pathname === '/things' ? 'bold' : '' }}
+            >
+              Schools ({schools.length})
+            </Link>
+            <Link
+              to="/students"
+              style={{ fontWeight: pathname === '/things' ? 'bold' : '' }}
+            >
+              Students ({students.length})
+            </Link>
+          </div>
+        );
+      };
+      const NavBar = connect(state => {
+        return {
+          schools: state.schools,
+          students: state.students
+        };
+      })(_NavBar);
+
+      class _Routes extends React.Component {
+        componentDidMount() {
+          this.props.loadSchools();
+          this.props.loadStudents();
+        }
+        render() {
+          return (
+            <HashRouter>
+              <Route component={NavBar} />
+            </HashRouter>
+          );
+        }
+      }
+      const Routes = connect(
+        null,
+        dispatch => {
+          return {
+            loadSchools: () => dispatch(getSchools()),
+            loadStudents: () => dispatch(getStudents())
+          };
+        }
+      )(_Routes);
+
+      const App = () => {
+        return (
+          <Provider store={store}>
+            <Routes />
+          </Provider>
+        );
+      };
 
       const root = document.querySelector('#root');
-      ReactDOM.render(<hr />, root);
+      ReactDOM.render(<App />, root);
     </script>
   </body>
 </html>
