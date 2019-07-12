@@ -13,8 +13,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(require('cors')());
 
+// static dir
+app.use(express.static(path.join(__dirname + '/client/')));
+
 app.get('/', (req, res, next) => {
-  res.sendFile(path.join(__dirname + '/index.html'));
+  res.sendFile(path.join(__dirname + '/public/index.html'));
 });
 
 // routes
