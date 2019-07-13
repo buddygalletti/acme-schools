@@ -33,12 +33,13 @@ router.post('/', async (req, res, next) => {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: req.body.email,
-        gpa: req.body.gpa
+        gpa: req.body.gpa,
+        schoolId: req.body.schoolId
       }
     });
     if (!wasCreated) {
     }
-    school.save();
+    student.save();
     res.json(student);
   } catch (ex) {
     next(ex);

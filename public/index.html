@@ -104,6 +104,7 @@
       };
 
       const addStudent = student => {
+        console.log(student);
         return async dispatch => {
           const response = await axios.post('/api/students/', student);
           dispatch(_addStudent(response.data));
@@ -126,7 +127,7 @@
           case ADD_STUDENT:
             return {
               ...state,
-              students: [...students, action.student]
+              students: [...state.students, action.student]
             };
           default:
             return state;
@@ -176,7 +177,6 @@
       class _AddStudentForm extends React.Component {
         constructor(props) {
           super(props);
-          console.log(props);
 
           this.handleChange = this.handleChange.bind(this);
           this.handleSave = this.handleSave.bind(this);
@@ -184,7 +184,6 @@
         }
         handleChange(ev) {
           this.props.student[ev.target.name] = ev.target.value;
-          console.log(this.props.student);
         }
         handleSave(ev) {
           ev.preventDefault();
@@ -192,7 +191,6 @@
         }
         handleSelect(ev) {
           this.props.student.schoolId = ev.target.value;
-          console.log(this.props.student);
         }
 
         render() {
@@ -251,7 +249,7 @@
         },
         dispatch => {
           return {
-            addStudent: () => dispatch(addStudent())
+            addStudent: student => dispatch(addStudent(student))
           };
         }
       )(_AddStudentForm);
