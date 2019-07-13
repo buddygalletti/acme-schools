@@ -88,13 +88,16 @@ const syncAndSeed = async () => {
   try {
     await db.sync({ force: true });
     await Promise.all(
-      sampleStudents.map(student => {
-        return Student.create(student);
-      })
-    );
-    await Promise.all(
       sampleSchools.map(school => {
         return School.create(school);
+      })
+    );
+    const harvard = await School.findOne({ where: { name: 'Harvard' } });
+    const harvardId = await harvard.id.toString();
+    console.log(harvardId);
+    await Promise.all(
+      sampleStudents.map(student => {
+        return Student.create(student, { where: { schoolId: harvardId } });
       })
     );
   } catch (ex) {

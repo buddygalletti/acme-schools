@@ -13,6 +13,12 @@
       #navbar > a {
         color: white;
       }
+      #addStudentForm {
+        display: flex;
+        justify-content: center;
+        margin-top: 2em;
+        margin-bottom: 2em;
+      }
     </style>
     <link
       rel="stylesheet"
@@ -188,6 +194,8 @@
         handleSave(ev) {
           ev.preventDefault();
           this.props.addStudent(this.props.student);
+          console.log(this.props);
+          this.props.location.hash = `/schools/${this.props.student.schoolId}`;
         }
         handleSelect(ev) {
           this.props.student.schoolId = ev.target.value;
@@ -198,34 +206,35 @@
           return (
             <div id="addStudentForm">
               <form onSubmit={handleSave}>
-                <label htmlFor="firstName">First name</label>
+                <label htmlFor="firstName">First name &rarr; </label>
                 <input
                   name="firstName"
                   value={this.props.firstName}
                   onChange={handleChange}
                 />
                 <br />
-                <label htmlFor="lastName">Last name</label>
+                <label htmlFor="lastName">Last name &rarr; </label>
                 <input
                   name="lastName"
                   value={this.props.lastName}
                   onChange={handleChange}
                 />
                 <br />
-                <label htmlFor="email">Email address</label>
+                <label htmlFor="email">Email address &rarr; </label>
                 <input
                   name="email"
                   value={this.props.email}
                   onChange={handleChange}
                 />
                 <br />
-                <label htmlFor="gpa">GPA</label>
+                <label htmlFor="gpa">GPA &rarr; </label>
                 <input
                   name="gpa"
                   value={this.props.gpa}
                   onChange={handleChange}
                 />
                 <br />
+                Enroll at &rarr;{' '}
                 <select value={this.props.schoolId} onChange={handleSelect}>
                   <option>-- Not Enrolled --</option>
                   {this.props.schools.map(school => (
@@ -234,6 +243,8 @@
                     </option>
                   ))}
                 </select>
+                <br />
+                <br />
                 <button type="submit">Save</button>
               </form>
             </div>
@@ -254,6 +265,38 @@
         }
       )(_AddStudentForm);
 
+      const _Students = ({ students, schools }) => {
+        return (
+          <div id="allStudents">
+            {students.map(student => {
+              return (
+                // need to change this to singleStudent component
+                <div className="studentCard" key={student.id}>
+                  <h5>{`${student.firstName} ${student.lastName}`}</h5>
+                  <img
+                    src={
+                      student.schoolId
+                        ? `${
+                            schools.find(
+                              school => school.id === student.schoolId
+                            ).imageUrl
+                          }`
+                        : ''
+                    }
+                  />
+                </div>
+              );
+            })}
+          </div>
+        );
+      };
+      const Students = connect(state => {
+        return {
+          students: state.students,
+          schools: state.schools
+        };
+      })(_Students);
+
       class _Routes extends React.Component {
         componentDidMount() {
           this.props.loadSchools();
@@ -264,6 +307,7 @@
             <HashRouter>
               <Route component={NavBar} />
               <Route path="/" component={AddStudentForm} />
+              <Route path="/students" component={Students} />
             </HashRouter>
           );
         }
