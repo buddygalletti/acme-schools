@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
+const bodyParser = require('body-parser');
 
 const path = require('path');
 
@@ -10,6 +11,7 @@ syncAndSeed();
 
 // dont forget that middleware
 app.use(express.json());
+app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(require('cors')());
 

@@ -36,6 +36,8 @@ router.post('/', async (req, res, next) => {
         gpa: req.body.gpa
       }
     });
+    if (!wasCreated) {
+    }
     school.save();
     res.json(student);
   } catch (ex) {

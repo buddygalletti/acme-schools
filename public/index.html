@@ -39,16 +39,18 @@
   <body>
     <div id="root"></div>
     <script type="text/babel">
+      ///////////////////////////////////  CDN STUFF  ///////////////////////////////////////
       // bring in stuff from cdn's
       const { HashRouter, Route, Link, NavLink } = ReactRouterDOM;
       const { createStore, applyMiddleware } = Redux;
       const { Provider, connect } = ReactRedux;
 
-      //////////////////////////////////////////////////////////////////////////
+      ///////////////////////////////////  START REDUX  ///////////////////////////////////////
 
       // define some constants here
       const GET_SCHOOLS = 'GET_SCHOOLS';
       const GET_STUDENTS = 'GET_STUDENTS';
+      const ADD_STUDENT = 'ADD_STUDENT';
 
       // action creators
       const _getSchools = schools => {
@@ -65,26 +67,46 @@
         };
       };
 
+      const _addStudent = student => {
+        return {
+          type: ADD_STUDENT,
+          student
+        };
+      };
+
       // create redux initial state
       const initialState = {
         schools: [],
         students: [],
         school: {},
-        student: {}
+        student: {
+          firstName: '',
+          lastName: '',
+          email: '',
+          gpa: 0.0,
+          schoolId: null
+        }
       };
 
       // thunks
       const getSchools = () => {
         return async dispatch => {
-          const response = await axios.get(`/api/schools/`);
+          const response = await axios.get('/api/schools/');
           dispatch(_getSchools(response.data));
         };
       };
 
       const getStudents = () => {
         return async dispatch => {
-          const response = await axios.get(`/api/students/`);
+          const response = await axios.get('/api/students/');
           dispatch(_getStudents(response.data));
+        };
+      };
+
+      const addStudent = student => {
+        return async dispatch => {
+          const response = await axios.post('/api/students/', student);
+          dispatch(_addStudent(response.data));
         };
       };
 
@@ -101,6 +123,11 @@
               ...state,
               students: action.students
             };
+          case ADD_STUDENT:
+            return {
+              ...state,
+              students: [...students, action.student]
+            };
           default:
             return state;
         }
@@ -109,7 +136,7 @@
       // create redux store
       const store = createStore(reducer, applyMiddleware(ReduxThunk.default));
 
-      //////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////  START REACT  /////////////////////////////////////
       // time for react
       const _NavBar = ({ schools, students }) => {
         const { pathname } = location;
@@ -150,29 +177,22 @@
         constructor(props) {
           super(props);
           console.log(props);
-          this.state = {
-            firstName: '',
-            lastName: '',
-            email: '',
-            gpa: 0.0
-          };
 
           this.handleChange = this.handleChange.bind(this);
           this.handleSave = this.handleSave.bind(this);
           this.handleSelect = this.handleSelect.bind(this);
         }
         handleChange(ev) {
-          this.setState({
-            [ev.target.name]: ev.target.name
-          });
+          this.props.student[ev.target.name] = ev.target.value;
+          console.log(this.props.student);
         }
         handleSave(ev) {
           ev.preventDefault();
+          this.props.addStudent(this.props.student);
         }
         handleSelect(ev) {
-          this.setState({
-            schoolId: ev.target.value
-          });
+          this.props.student.schoolId = ev.target.value;
+          console.log(this.props.student);
         }
 
         render() {
@@ -183,32 +203,32 @@
                 <label htmlFor="firstName">First name</label>
                 <input
                   name="firstName"
-                  value={this.state.firstName}
+                  value={this.props.firstName}
                   onChange={handleChange}
                 />
                 <br />
                 <label htmlFor="lastName">Last name</label>
                 <input
                   name="lastName"
-                  value={this.state.lastName}
+                  value={this.props.lastName}
                   onChange={handleChange}
                 />
                 <br />
                 <label htmlFor="email">Email address</label>
                 <input
                   name="email"
-                  value={this.state.email}
+                  value={this.props.email}
                   onChange={handleChange}
                 />
                 <br />
                 <label htmlFor="gpa">GPA</label>
                 <input
                   name="gpa"
-                  value={this.state.gpa}
+                  value={this.props.gpa}
                   onChange={handleChange}
                 />
                 <br />
-                <select value={this.state.schoolId} onChange={handleSelect}>
+                <select value={this.props.schoolId} onChange={handleSelect}>
                   <option>-- Not Enrolled --</option>
                   {this.props.schools.map(school => (
                     <option key={school.id} value={school.id}>
@@ -216,6 +236,7 @@
                     </option>
                   ))}
                 </select>
+                <button type="submit">Save</button>
               </form>
             </div>
           );
@@ -229,7 +250,9 @@
           };
         },
         dispatch => {
-          return {};
+          return {
+            addStudent: () => dispatch(addStudent())
+          };
         }
       )(_AddStudentForm);
 
