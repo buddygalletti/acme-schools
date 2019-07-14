@@ -62,9 +62,20 @@
     <script type="text/babel">
       ///////////////////////////////////  STAT FUNCTIONS  ///////////////////////////////////////
       const mostPopularSchool = (students = [], schools = []) => {
+        const getSchoolId = (schoolName, schools) => {
+          const foundSchool = schools.find(
+            school => schoolName === school.name
+          );
+          return foundSchool.id;
+        };
+
         const enrollment = {};
         schools.forEach(school => {
-          enrollment[school.id] = { name: school.name, enrolled: 0 };
+          enrollment[school.id] = {
+            id: school.id,
+            name: school.name,
+            enrolled: 0
+          };
         });
         students.forEach(student => {
           if (student.schoolId) {
@@ -80,7 +91,13 @@
             mostPopular = stats[i].name;
           }
         }
-        return mostPopular;
+        const mostPopularId = getSchoolId(mostPopular, schools);
+        // TODO return schoool id with it also
+        return {
+          mostPopular,
+          max,
+          mostPopularId
+        };
       };
 
       ///////////////////////////////////  CDN STUFF  ///////////////////////////////////////
@@ -96,6 +113,7 @@
       const GET_STUDENTS = 'GET_STUDENTS';
       const ADD_STUDENT = 'ADD_STUDENT';
       const DESTROY_STUDENT = 'DESTROY_STUDENT';
+      const GET_MOST_POPULAR = 'GET_MOST_POPULAR';
 
       // action creators
       const _getSchools = schools => {
@@ -126,6 +144,14 @@
         };
       };
 
+      const _getMostPopular = mostPopularSchool => {
+        console.log('im being called');
+        return {
+          type: GET_MOST_POPULAR,
+          mostPopularSchool
+        };
+      };
+
       // create redux initial state
       const initialState = {
         schools: [],
@@ -137,7 +163,8 @@
           email: '',
           gpa: 0.0,
           schoolId: null
-        }
+        },
+        mostPopular: {}
       };
 
       // thunks
@@ -193,7 +220,16 @@
             );
             return {
               ...state,
-              students: studentsAfterDelete
+              students: [...studentsAfterDelete]
+            };
+          case GET_MOST_POPULAR:
+            const getMostPopularSchool = mostPopularSchool(
+              state.students,
+              state.schools
+            );
+            return {
+              ...state,
+              mostPopular: { ...getMostPopularSchool }
             };
           default:
             return state;
@@ -205,8 +241,8 @@
 
       /////////////////////////////////////  START REACT  /////////////////////////////////////
       // time for react
-      const _NavBar = ({ schools, students }) => {
-        const { pathname } = location;
+      const _NavBar = ({ schools, students, mostPopular }) => {
+        console.log(mostPopular);
         const activeStyle = {
           fontWeight: 'bold',
           color: 'white',
@@ -230,13 +266,20 @@
             <NavLink to="/students" activeStyle={activeStyle}>
               Students ({students.length})
             </NavLink>
+            <NavLink
+              to={`/students/${mostPopular.mostPopularId}`}
+              activeStyle={activeStyle}
+            >
+              Most Popular {mostPopular.mostPopular} ({mostPopular.max})
+            </NavLink>
           </div>
         );
       };
       const NavBar = connect(state => {
         return {
           schools: state.schools,
-          students: state.students
+          students: state.students,
+          mostPopular: state.mostPopular
         };
       })(_NavBar);
 
@@ -391,7 +434,7 @@
             <HashRouter>
               <Route component={NavBar} />
               <Route path="/" component={AddStudentForm} />
-              <Route path="/students" component={Students} />
+              <Route path="/students" exact component={Students} />
             </HashRouter>
           );
         }
