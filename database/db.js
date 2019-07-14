@@ -92,12 +92,9 @@ const syncAndSeed = async () => {
         return School.create(school);
       })
     );
-    const harvard = await School.findOne({ where: { name: 'Harvard' } });
-    const harvardId = await harvard.id.toString();
-    console.log(harvardId);
     await Promise.all(
       sampleStudents.map(student => {
-        return Student.create(student, { where: { schoolId: harvardId } });
+        return Student.create(student);
       })
     );
   } catch (ex) {
