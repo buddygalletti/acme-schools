@@ -19,6 +19,21 @@
         margin-top: 2em;
         margin-bottom: 2em;
       }
+      #allStudents {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+      .studentCard {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border: 5px solid black;
+        border-radius: 25px;
+        padding: 50px;
+        margin: 50px;
+      }
     </style>
     <link
       rel="stylesheet"
@@ -57,6 +72,7 @@
       const GET_SCHOOLS = 'GET_SCHOOLS';
       const GET_STUDENTS = 'GET_STUDENTS';
       const ADD_STUDENT = 'ADD_STUDENT';
+      const DESTROY_STUDENT = 'DESTROY_STUDENT';
 
       // action creators
       const _getSchools = schools => {
@@ -77,6 +93,13 @@
         return {
           type: ADD_STUDENT,
           student
+        };
+      };
+
+      const _destroyStudent = id => {
+        return {
+          type: DESTROY_STUDENT,
+          id
         };
       };
 
@@ -110,10 +133,16 @@
       };
 
       const addStudent = student => {
-        console.log(student);
         return async dispatch => {
           const response = await axios.post('/api/students/', student);
           dispatch(_addStudent(response.data));
+        };
+      };
+
+      const destroyStudent = id => {
+        return async dispatch => {
+          const response = await axios.delete(`/api/students/${id}`);
+          dispatch(_destroyStudent(response.data));
         };
       };
 
@@ -134,6 +163,14 @@
             return {
               ...state,
               students: [...state.students, action.student]
+            };
+          case DESTROY_STUDENT:
+            const studentsAfterDelete = state.students.filter(
+              student => action.id !== student.id
+            );
+            return {
+              ...state,
+              students: studentsAfterDelete
             };
           default:
             return state;
@@ -194,7 +231,6 @@
         handleSave(ev) {
           ev.preventDefault();
           this.props.addStudent(this.props.student);
-          console.log(this.props);
           this.props.location.hash = `/schools/${this.props.student.schoolId}`;
         }
         handleSelect(ev) {
@@ -265,37 +301,62 @@
         }
       )(_AddStudentForm);
 
-      const _Students = ({ students, schools }) => {
-        return (
-          <div id="allStudents">
-            {students.map(student => {
-              return (
-                // need to change this to singleStudent component
-                <div className="studentCard" key={student.id}>
-                  <h5>{`${student.firstName} ${student.lastName}`}</h5>
-                  <img
-                    src={
-                      student.schoolId
-                        ? `${
-                            schools.find(
-                              school => school.id === student.schoolId
-                            ).imageUrl
-                          }`
-                        : ''
-                    }
-                  />
-                </div>
-              );
-            })}
-          </div>
-        );
-      };
-      const Students = connect(state => {
-        return {
-          students: state.students,
-          schools: state.schools
-        };
-      })(_Students);
+      // const _StudentCard = ({ students, schools }) => {
+      //   return;
+      // };
+      // const StudentCard = connect(state => {
+      //   return {
+      //     students: state.students,
+      //     schools: state.schools
+      //   };
+      // })(_StudentCard);
+
+      class _Students extends React.Component {
+        constructor(props) {
+          super(props);
+        }
+        render() {
+          const { students, schools } = this.props;
+          let school;
+          return (
+            <div id="allStudents">
+              {students.map(student => {
+                if (student.schoolId) {
+                  school = schools.find(function(school) {
+                    return school.id === student.schoolId;
+                  });
+                }
+                return (
+                  // need to change this to StudentCard component
+                  <div className="studentCard" key={student.id}>
+                    <h5>{`${student.firstName} ${student.lastName}`}</h5>
+                    <img src={school.imageUrl} />
+                    <br />
+                    <button
+                      onClick={() => this.props.destroyStudent(student.id)}
+                    >
+                      Destroy Student
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+      }
+      const Students = connect(
+        state => {
+          return {
+            students: state.students,
+            schools: state.schools
+          };
+        },
+        dispatch => {
+          return {
+            destroyStudent: student => dispatch(destroyStudent(student))
+          };
+        }
+      )(_Students);
 
       class _Routes extends React.Component {
         componentDidMount() {
