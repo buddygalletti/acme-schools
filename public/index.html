@@ -33,6 +33,7 @@
         border-radius: 25px;
         padding: 50px;
         margin: 50px;
+        text-align: center;
       }
     </style>
     <link
@@ -114,6 +115,7 @@
       const ADD_STUDENT = 'ADD_STUDENT';
       const DESTROY_STUDENT = 'DESTROY_STUDENT';
       const GET_MOST_POPULAR = 'GET_MOST_POPULAR';
+      const UPDATE_STUDENT = 'UPDATE_STUDENT';
 
       // action creators
       const _getSchools = schools => {
@@ -144,6 +146,14 @@
         };
       };
 
+      const _updateStudent = id => {
+        return {
+          type: UPDATE_STUDENT,
+          id
+        };
+      };
+
+      // this is not working
       const _getMostPopular = mostPopularSchool => {
         console.log('im being called');
         return {
@@ -196,6 +206,13 @@
         };
       };
 
+      const updateStudent = id => {
+        return async dispatch => {
+          const response = axios.put(`/api/students/${id}`);
+          dispatch(_updateStudent(response.data));
+        };
+      };
+
       // main reducer, think about using combine reducer later
       const reducer = (state = initialState, action) => {
         switch (action.type) {
@@ -231,6 +248,8 @@
               ...state,
               mostPopular: { ...getMostPopularSchool }
             };
+          case UPDATE_STUDENT:
+            return {};
           default:
             return state;
         }

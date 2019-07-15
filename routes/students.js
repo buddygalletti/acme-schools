@@ -59,4 +59,16 @@ router.delete('/:id', async (req, res, next) => {
   }
 });
 
+router.put('/:id', async (req, res, next) => {
+  try {
+    const student = await Student.findByPk(req.params.id);
+    await student.update({
+      schoolId: req.body.schoolId
+    });
+    res.json(student);
+  } catch (ex) {
+    next(ex);
+  }
+});
+
 module.exports = router;
