@@ -128,7 +128,6 @@
       const GET_STUDENTS = 'GET_STUDENTS';
       const ADD_STUDENT = 'ADD_STUDENT';
       const DESTROY_STUDENT = 'DESTROY_STUDENT';
-      const GET_MOST_POPULAR = 'GET_MOST_POPULAR';
       const UPDATE_STUDENT = 'UPDATE_STUDENT';
 
       // action creators
@@ -404,16 +403,6 @@
         }
       )(_AddStudentForm);
 
-      // const _StudentCard = ({ students, schools }) => {
-      //   return;
-      // };
-      // const StudentCard = connect(state => {
-      //   return {
-      //     students: state.students,
-      //     schools: state.schools
-      //   };
-      // })(_StudentCard);
-
       class _Students extends React.Component {
         constructor(props) {
           super(props);
@@ -501,7 +490,9 @@
               {schools.map(school => {
                 return (
                   <div className="schoolCard" key={school.id}>
-                    <Link to={`/schools/${school.id}`}>{school.name}</Link>
+                    <h5>
+                      <Link to={`/schools/${school.id}`}>{school.name}</Link>
+                    </h5>
                     <img src={school.imageUrl} />
                     <br />
                     <p>
