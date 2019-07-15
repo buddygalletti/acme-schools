@@ -62,14 +62,8 @@
     <div id="root"></div>
     <script type="text/babel">
       ///////////////////////////////////  STAT FUNCTIONS  ///////////////////////////////////////
-      const mostPopularSchool = (students = [], schools = []) => {
-        const getSchoolId = (schoolName, schools) => {
-          const foundSchool = schools.find(
-            school => schoolName === school.name
-          );
-          return foundSchool.id;
-        };
 
+      const mostPopularSchool = (students = [], schools = []) => {
         const enrollment = {};
         schools.forEach(school => {
           enrollment[school.id] = {
@@ -85,19 +79,23 @@
         });
         const stats = Object.values(enrollment);
         let max = 0;
-        let mostPopular;
+        let mostPopularName;
+        let mostPopularId;
         for (let i = 0; i < stats.length; i++) {
           if (stats[i].enrolled > max) {
             max = stats[i].enrolled;
-            mostPopular = stats[i].name;
+            mostPopularName = stats[i].name;
+            mostPopularId = stats[i].id;
           }
         }
-        const mostPopularId = getSchoolId(mostPopular, schools);
-        // TODO return schoool id with it also
+        // TODO return schoool id with it also. add to return
+        // const foundSchool = schools.find(school => mostPopular === school.name);
+        // const mostPopularId = foundSchool.id;
+
         return {
-          mostPopular,
-          max,
-          mostPopularId
+          mostPopularName,
+          mostPopularId,
+          max
         };
       };
 
@@ -154,15 +152,6 @@
         };
       };
 
-      // this is not working... consider making a new api endpoint and have sequelize calculate the most popular schoolId
-      const _getMostPopular = mostPopularSchool => {
-        console.log('im being called');
-        return {
-          type: GET_MOST_POPULAR,
-          mostPopularSchool
-        };
-      };
-
       // create redux initial state
       const initialState = {
         schools: [],
@@ -174,8 +163,7 @@
           email: '',
           gpa: 0.0,
           schoolId: null
-        },
-        mostPopular: {}
+        }
       };
 
       // thunks
@@ -241,11 +229,6 @@
               ...state,
               students: [...studentsAfterDelete]
             };
-          case GET_MOST_POPULAR:
-            const getMostPopularSchool = mostPopularSchool(
-              state.students,
-              state.schools
-            );
             return {
               ...state,
               mostPopular: { ...getMostPopularSchool }
@@ -270,7 +253,10 @@
 
       /////////////////////////////////////  START REACT  /////////////////////////////////////
       // time for react
-      const _NavBar = ({ schools, students, mostPopular }) => {
+      const _NavBar = props => {
+        const { schools, students, mostPopular } = props;
+        const mostPopularStats = mostPopular(students, schools);
+        console.log(mostPopularStats);
         const activeStyle = {
           fontWeight: 'bold',
           color: 'white',
@@ -295,10 +281,11 @@
               Students ({students.length})
             </NavLink>
             <NavLink
-              to={`/students/${mostPopular.mostPopularId}`}
+              to={`/students/${mostPopularStats.mostPopularId}`}
               activeStyle={activeStyle}
             >
-              Most Popular {mostPopular.mostPopular} ({mostPopular.max})
+              Most Popular {mostPopularStats.mostPopularName} (
+              {mostPopularStats.max})
             </NavLink>
           </div>
         );
@@ -307,7 +294,7 @@
         return {
           schools: state.schools,
           students: state.students,
-          mostPopular: state.mostPopular
+          mostPopular: mostPopularSchool
         };
       })(_NavBar);
 
