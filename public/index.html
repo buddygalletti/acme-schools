@@ -63,7 +63,7 @@
   <body>
     <div id="root"></div>
     <script type="text/babel">
-      ///////////////////////////////////  STAT FUNCTIONS  ///////////////////////////////////////
+      ///////////////////////////////////  HELPER FUNCTIONS  ///////////////////////////////////////
 
       const mostPopularSchool = (students = [], schools = []) => {
         // this does not deal with ties
@@ -91,10 +91,6 @@
             mostPopularId = stats[i].id;
           }
         }
-        // TODO return schoool id with it also. add to return
-        // const foundSchool = schools.find(school => mostPopular === school.name);
-        // const mostPopularId = foundSchool.id;
-
         return {
           mostPopularName,
           mostPopularId,
@@ -102,7 +98,7 @@
         };
       };
 
-      const studentCount = (schoolId, students) => {
+      const studentCount = (schoolId = 0, students = []) => {
         const countsById = {};
         for (let i = 0; i < students.length; i++) {
           let student = students[i];
@@ -113,6 +109,16 @@
           }
         }
         return countsById[schoolId];
+      };
+
+      // TODO this is not finished
+      const highestAvgGPA = (students = [], schools = []) => {
+        // goal: return { id: UUID, name: 'Harvard', sumGPA: *, numStudents: * }
+        const results = {};
+        for (let i = 0; i < schools.length; i++) {
+          let school = schools[i];
+        }
+        console.log(results);
       };
 
       ///////////////////////////////////  CDN STUFF  ///////////////////////////////////////
@@ -153,7 +159,6 @@
       };
 
       const _destroyStudent = id => {
-        console.log(`im being called with ${id}`);
         return {
           type: DESTROY_STUDENT,
           id
@@ -243,11 +248,6 @@
             const studentsAfterDelete = state.students.filter(
               student => action.id !== student.id
             );
-            console.log(studentsAfterDelete === state.students);
-            console.log({
-              ...state,
-              students: studentsAfterDelete
-            });
             return {
               ...state,
               students: studentsAfterDelete
@@ -496,7 +496,7 @@
                     <img src={school.imageUrl} />
                     <br />
                     <p>
-                      Student Count{' '}
+                      Student Count:{' '}
                       {count(school.id, students)
                         ? count(school.id, students)
                         : 0}
