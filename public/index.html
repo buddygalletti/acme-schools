@@ -433,6 +433,7 @@
                       )}
                     </p>
                     <select defaultValue={school.id}>
+                      <option>Not Enrolled</option>
                       {schools.map(school => (
                         <option key={school.name} value={school.id}>
                           {school.name}
