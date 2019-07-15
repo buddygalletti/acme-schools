@@ -102,6 +102,19 @@
         };
       };
 
+      const studentCount = (schoolId, students) => {
+        const countsById = {};
+        for (let i = 0; i < students.length; i++) {
+          let student = students[i];
+          if (Object.keys(countsById).includes(student.schoolId)) {
+            countsById[student.schoolId]++;
+          } else {
+            countsById[student.schoolId] = 1;
+          }
+        }
+        return countsById[schoolId];
+      };
+
       ///////////////////////////////////  CDN STUFF  ///////////////////////////////////////
       // bring in stuff from cdn's
       const { HashRouter, Route, Link, NavLink } = ReactRouterDOM;
@@ -325,49 +338,54 @@
         render() {
           const { handleChange, handleSave, handleSelect } = this;
           return (
-            <div id="addStudentForm">
-              <form onSubmit={handleSave}>
-                <label htmlFor="firstName">First name &rarr; </label>
-                <input
-                  name="firstName"
-                  value={this.props.firstName}
-                  onChange={handleChange}
-                />
-                <br />
-                <label htmlFor="lastName">Last name &rarr; </label>
-                <input
-                  name="lastName"
-                  value={this.props.lastName}
-                  onChange={handleChange}
-                />
-                <br />
-                <label htmlFor="email">Email address &rarr; </label>
-                <input
-                  name="email"
-                  value={this.props.email}
-                  onChange={handleChange}
-                />
-                <br />
-                <label htmlFor="gpa">GPA &rarr; </label>
-                <input
-                  name="gpa"
-                  value={this.props.gpa}
-                  onChange={handleChange}
-                />
-                <br />
-                Enroll at &rarr;{' '}
-                <select value={this.props.schoolId} onChange={handleSelect}>
-                  <option>-- Not Enrolled --</option>
-                  {this.props.schools.map(school => (
-                    <option key={school.id} value={school.id}>
-                      {school.name}
-                    </option>
-                  ))}
-                </select>
-                <br />
-                <br />
-                <button type="submit">Save</button>
-              </form>
+            <div id="form-container">
+              <div id="addStudentForm">
+                <form onSubmit={handleSave}>
+                  <label htmlFor="firstName">First name &rarr; </label>
+                  <input
+                    name="firstName"
+                    value={this.props.firstName}
+                    onChange={handleChange}
+                  />
+                  <br />
+                  <label htmlFor="lastName">Last name &rarr; </label>
+                  <input
+                    name="lastName"
+                    value={this.props.lastName}
+                    onChange={handleChange}
+                  />
+                  <br />
+                  <label htmlFor="email">Email address &rarr; </label>
+                  <input
+                    name="email"
+                    value={this.props.email}
+                    onChange={handleChange}
+                  />
+                  <br />
+                  <label htmlFor="gpa">GPA &rarr; </label>
+                  <input
+                    name="gpa"
+                    value={this.props.gpa}
+                    onChange={handleChange}
+                  />
+                  <br />
+                  Enroll at &rarr;{' '}
+                  <select value={this.props.schoolId} onChange={handleSelect}>
+                    <option>-- Not Enrolled --</option>
+                    {this.props.schools.map(school => (
+                      <option key={school.id} value={school.id}>
+                        {school.name}
+                      </option>
+                    ))}
+                  </select>
+                  <br />
+                  <br />
+                  <button type="submit">Save</button>
+                </form>
+              </div>
+              <div>
+                <hr />
+              </div>
             </div>
           );
         }
@@ -472,10 +490,11 @@
       class _Schools extends React.Component {
         constructor(props) {
           super(props);
+          console.log(props);
         }
 
         render() {
-          const { students, schools } = this.props;
+          const { students, schools, count } = this.props;
 
           return (
             <div id="allSchools">
@@ -485,7 +504,12 @@
                     <Link to={`/schools/${school.id}`}>{school.name}</Link>
                     <img src={school.imageUrl} />
                     <br />
-                    <p>Student Count</p>
+                    <p>
+                      Student Count{' '}
+                      {count(school.id, students)
+                        ? count(school.id, students)
+                        : 0}
+                    </p>
                     <br />
                   </div>
                 );
@@ -498,7 +522,8 @@
         state => {
           return {
             students: state.students,
-            schools: state.schools
+            schools: state.schools,
+            count: studentCount
           };
         },
         dispatch => {
