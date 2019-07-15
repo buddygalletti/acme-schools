@@ -7,7 +7,7 @@ const Student = require('../database/models/Student');
 router.get('/', async (req, res, next) => {
   try {
     const students = await Student.findAll();
-    res.json(students);
+    res.send(students);
   } catch (ex) {
     next(ex);
   }
@@ -19,7 +19,7 @@ router.get('/:id', async (req, res, next) => {
     if (!student) {
       res.sendStatus(404);
     } else {
-      res.json(student);
+      res.send(student);
     }
   } catch (ex) {
     next(ex);
@@ -40,7 +40,7 @@ router.post('/', async (req, res, next) => {
     if (!wasCreated) {
     }
     student.save();
-    res.json(student);
+    res.send(student);
   } catch (ex) {
     next(ex);
   }
@@ -65,7 +65,7 @@ router.put('/:id', async (req, res, next) => {
     await student.update({
       schoolId: req.body.schoolId
     });
-    res.json(student);
+    res.send(student);
   } catch (ex) {
     next(ex);
   }

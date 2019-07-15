@@ -7,7 +7,7 @@ const School = require('../database/models/School');
 router.get('/', async (req, res, next) => {
   try {
     const schools = await School.findAll();
-    res.json(schools);
+    res.send(schools);
   } catch (ex) {
     next(ex);
   }
@@ -19,7 +19,7 @@ router.get('/:id', async (req, res, next) => {
     if (!school) {
       res.sendStatus(404);
     } else {
-      res.json(school);
+      res.send(school);
     }
   } catch (ex) {
     next(ex);
@@ -35,7 +35,7 @@ router.post('/', async (req, res, next) => {
       }
     });
     school.save();
-    res.json(school);
+    res.send(school);
   } catch (ex) {
     next(ex);
   }
