@@ -3,6 +3,7 @@ const router = express.Router();
 
 // model
 const School = require('../database/models/School');
+const Student = require('../database/models/Student');
 
 router.get('/', async (req, res, next) => {
   try {
@@ -15,12 +16,10 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   try {
-    const school = await School.findByPk(req.params.id);
-    if (!school) {
-      res.sendStatus(404);
-    } else {
-      res.send(school);
-    }
+    const studentsEnrolled = await Student.findAll({
+      where: { schoolId: req.params.id }
+    });
+    res.send(studentsEnrolled);
   } catch (ex) {
     next(ex);
   }
