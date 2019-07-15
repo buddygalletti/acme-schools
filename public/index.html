@@ -64,6 +64,7 @@
       ///////////////////////////////////  STAT FUNCTIONS  ///////////////////////////////////////
 
       const mostPopularSchool = (students = [], schools = []) => {
+        // this does not deal with ties
         const enrollment = {};
         schools.forEach(school => {
           enrollment[school.id] = {
@@ -144,11 +145,12 @@
         };
       };
 
-      const _updateStudent = (id, newId) => {
+      const _updateStudent = student => {
+        console.log(`now im being called with ${student}`);
         return {
           type: UPDATE_STUDENT,
-          id,
-          newId
+          studentId: student.id,
+          newSchoolId: student.schoolId
         };
       };
 
@@ -195,9 +197,12 @@
         };
       };
 
-      const updateStudent = id => {
+      const updateStudent = (studentId, schoolId) => {
         return async dispatch => {
-          const response = axios.put(`/api/students/${id}`);
+          const response = await axios.put(
+            `/api/students/${studentId}`,
+            schoolId
+          );
           dispatch(_updateStudent(response.data));
         };
       };
@@ -236,8 +241,8 @@
           // TODO this is not finished
           case UPDATE_STUDENT:
             const students = state.students.map(student => {
-              if (student.id === action.id) {
-                return { ...student, schoolId: action.newId };
+              if (student.id === action.studentId) {
+                return { ...student, schoolId: action.newSchoolId };
               } else {
                 return student;
               }
@@ -396,8 +401,14 @@
         constructor(props) {
           super(props);
         }
+
         render() {
-          const { students, schools } = this.props;
+          const {
+            students,
+            schools,
+            destroyStudent,
+            updateStudent
+          } = this.props;
           let school;
           return (
             <div id="allStudents">
@@ -419,7 +430,12 @@
                         2
                       )}
                     </p>
-                    <select defaultValue={school.id}>
+                    <select
+                      defaultValue={school.id}
+                      onChange={ev =>
+                        updateStudent(student.id, ev.target.value)
+                      }
+                    >
                       <option>Not Enrolled</option>
                       {schools.map(school => (
                         <option key={school.name} value={school.id}>
@@ -428,9 +444,7 @@
                       ))}
                     </select>
                     <br />
-                    <button
-                      onClick={() => this.props.destroyStudent(student.id)}
-                    >
+                    <button onClick={() => destroyStudent(student.id)}>
                       Destroy Student
                     </button>
                   </div>
@@ -449,7 +463,9 @@
         },
         dispatch => {
           return {
-            destroyStudent: student => dispatch(destroyStudent(student))
+            destroyStudent: student => dispatch(destroyStudent(student)),
+            updateStudent: (studentId, schoolId) =>
+              dispatch(updateStudent(studentId, schoolId))
           };
         }
       )(_Students);
