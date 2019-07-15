@@ -1,8 +1,12 @@
 <html>
   <head>
     <style>
-      a {
-        margin-right: 20px;
+      span > a {
+        font-size: 30px;
+        font-weight: bold;
+        color: white;
+        text-decoration: 'none';
+        margin-right: 3em;
       }
       #navbar {
         background-color: dodgerblue;
@@ -12,12 +16,16 @@
       }
       #navbar > a {
         color: white;
+        margin-right: 20px;
       }
       #addStudentForm {
         display: flex;
         justify-content: center;
         margin-top: 2em;
         margin-bottom: 2em;
+      }
+      #home-container {
+        padding: 1.5em;
       }
       #allStudents,
       #allSchools {
@@ -281,16 +289,18 @@
         };
         return (
           <div id="navbar">
-            <NavLink
-              to="/"
-              activeStyle={{
-                ...activeStyle,
-                fontSize: '30px',
-                marginRight: '3em'
-              }}
-            >
-              ACME Schools
-            </NavLink>
+            <span>
+              <NavLink
+                to="/home"
+                activeStyle={{
+                  ...activeStyle,
+                  fontSize: '30px',
+                  marginRight: '3em'
+                }}
+              >
+                ACME Schools
+              </NavLink>
+            </span>
             <NavLink to="/schools" activeStyle={activeStyle}>
               Schools ({schools.length})
             </NavLink>
@@ -314,6 +324,31 @@
           mostPopular: mostPopularSchool
         };
       })(_NavBar);
+
+      const _Home = props => {
+        const { schools, students, mostPopular } = props;
+        const mostPopularStats = mostPopular(students, schools);
+
+        return (
+          <div id="home-container">
+            <h2>Home</h2>
+            <p>
+              Our most popular school is{' '}
+              <Link to={`/schools/${mostPopularStats.mostPopularId}`}>
+                {mostPopularStats.mostPopularName}
+              </Link>{' '}
+              with {mostPopularStats.max} students.
+            </p>
+          </div>
+        );
+      };
+      const Home = connect(state => {
+        return {
+          schools: state.schools,
+          students: state.students,
+          mostPopular: mostPopularSchool
+        };
+      })(_Home);
 
       class _AddStudentForm extends React.Component {
         constructor(props) {
@@ -551,6 +586,7 @@
             <HashRouter>
               <Route component={NavBar} />
               <Route path="/" component={AddStudentForm} />
+              <Route path="/home" component={Home} />
               <Route path="/students" exact component={Students} />
               <Route path="/schools" exact component={Schools} />
             </HashRouter>
