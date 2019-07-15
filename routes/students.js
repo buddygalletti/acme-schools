@@ -53,7 +53,7 @@ router.delete('/:id', async (req, res, next) => {
         id: req.params.id
       }
     });
-    res.sendStatus(204);
+    res.send(req.params.id);
   } catch (ex) {
     next(ex);
   }

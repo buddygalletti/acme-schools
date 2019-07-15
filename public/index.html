@@ -153,6 +153,7 @@
       };
 
       const _destroyStudent = id => {
+        console.log(`im being called with ${id}`);
         return {
           type: DESTROY_STUDENT,
           id
@@ -242,15 +243,15 @@
             const studentsAfterDelete = state.students.filter(
               student => action.id !== student.id
             );
+            console.log(studentsAfterDelete === state.students);
+            console.log({
+              ...state,
+              students: studentsAfterDelete
+            });
             return {
               ...state,
-              students: [...studentsAfterDelete]
+              students: studentsAfterDelete
             };
-            return {
-              ...state,
-              mostPopular: { ...getMostPopularSchool }
-            };
-          // TODO this is not finished
           case UPDATE_STUDENT:
             const students = state.students.map(student => {
               if (student.id === action.studentId) {
@@ -479,12 +480,10 @@
       class _Schools extends React.Component {
         constructor(props) {
           super(props);
-          console.log(props);
         }
 
         render() {
           const { students, schools, count, updateStudent } = this.props;
-          console.log(students);
 
           return (
             <div id="allSchools">
