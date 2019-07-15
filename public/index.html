@@ -19,13 +19,15 @@
         margin-top: 2em;
         margin-bottom: 2em;
       }
-      #allStudents {
+      #allStudents,
+      #allSchools {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-around;
       }
-      .studentCard {
+      .studentCard,
+      .schoolCard {
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -146,7 +148,6 @@
       };
 
       const _updateStudent = student => {
-        console.log(`now im being called with ${student}`);
         return {
           type: UPDATE_STUDENT,
           studentId: student.id,
@@ -226,7 +227,6 @@
               students: [...state.students, action.student]
             };
           case DESTROY_STUDENT:
-            console.log('im in destroy');
             const studentsAfterDelete = state.students.filter(
               student => action.id !== student.id
             );
@@ -261,7 +261,6 @@
       const _NavBar = props => {
         const { schools, students, mostPopular } = props;
         const mostPopularStats = mostPopular(students, schools);
-        console.log(mostPopularStats);
         const activeStyle = {
           fontWeight: 'bold',
           color: 'white',
@@ -470,6 +469,45 @@
         }
       )(_Students);
 
+      class _Schools extends React.Component {
+        constructor(props) {
+          super(props);
+        }
+
+        render() {
+          const { students, schools } = this.props;
+
+          return (
+            <div id="allSchools">
+              {schools.map(school => {
+                return (
+                  <div className="schoolCard" key={school.id}>
+                    <Link to={`/schools/${school.id}`}>{school.name}</Link>
+                    <img src={school.imageUrl} />
+                    <br />
+                    <p>Student Count</p>
+                    <br />
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+      }
+      const Schools = connect(
+        state => {
+          return {
+            students: state.students,
+            schools: state.schools
+          };
+        },
+        dispatch => {
+          return {};
+        }
+      )(_Schools);
+
+      /////////////////////////////////////  ROUTES && APP  /////////////////////////////////////
+
       class _Routes extends React.Component {
         componentDidMount() {
           this.props.loadSchools();
@@ -481,6 +519,7 @@
               <Route component={NavBar} />
               <Route path="/" component={AddStudentForm} />
               <Route path="/students" exact component={Students} />
+              <Route path="/schools" exact component={Schools} />
             </HashRouter>
           );
         }
