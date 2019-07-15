@@ -87,14 +87,14 @@ const sampleSchools = [
 const syncAndSeed = async () => {
   try {
     await db.sync({ force: true });
-    await Promise.all(
+    const [calpoly, harvard, yale, brown, columbia] = await Promise.all(
       sampleSchools.map(school => {
         return School.create(school);
       })
     );
-    await Promise.all(
+    const [buddy, hannah, max, josie, robb, josh, ty, gail] = await Promise.all(
       sampleStudents.map(student => {
-        return Student.create(student);
+        return Student.create({ ...student, schoolId: calpoly.id });
       })
     );
   } catch (ex) {
