@@ -483,7 +483,8 @@
         }
 
         render() {
-          const { students, schools, count } = this.props;
+          const { students, schools, count, updateStudent } = this.props;
+          console.log(students);
 
           return (
             <div id="allSchools">
@@ -501,6 +502,20 @@
                         ? count(school.id, students)
                         : 0}
                     </p>
+                    <select
+                      onChange={ev => updateStudent(ev.target.value, school.id)}
+                    >
+                      <option defaultValue>-- Add Student --</option>
+                      {students.map(student => {
+                        if (student.schoolId !== school.id) {
+                          return (
+                            <option key={student.id} value={student.id}>
+                              {`${student.firstName} ${student.lastName}`}
+                            </option>
+                          );
+                        }
+                      })}
+                    </select>
                     <br />
                   </div>
                 );
@@ -518,7 +533,10 @@
           };
         },
         dispatch => {
-          return {};
+          return {
+            updateStudent: (studentId, schoolId) =>
+              dispatch(updateStudent(studentId, schoolId))
+          };
         }
       )(_Schools);
 
