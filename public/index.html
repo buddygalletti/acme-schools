@@ -119,14 +119,39 @@
         return countsById[schoolId];
       };
 
-      // TODO this is not finished
       const highestAvgGPA = (students = [], schools = []) => {
-        // goal: return { id: UUID, name: 'Harvard', sumGPA: *, numStudents: * }
-        const results = {};
-        for (let i = 0; i < schools.length; i++) {
-          let school = schools[i];
+        const totalsById = {};
+        for (let i = 0; i < students.length; i++) {
+          let student = students[i];
+          let keys = Object.keys(totalsById);
+          if (keys.includes(student.schoolId.toString())) {
+            totalsById[student.schoolId] += student.gpa;
+          } else {
+            totalsById[student.schoolId] = student.gpa;
+          }
         }
-        console.log(results);
+        const totalPairedWithId = Object.entries(totalsById);
+        const pairMapToAvg = totalPairedWithId.map(pair => {
+          const numStudents = studentCount(pair[0], students);
+          const avgGPA = pair[1] / studentCount(pair[0], students);
+          return [pair[0], avgGPA];
+        });
+        let max = 0;
+        const greatestAvg = pairMapToAvg.reduce((acc, pair) => {
+          if (pair[1] > max) {
+            max = pair[1];
+            return pair;
+          }
+          return acc;
+        }, []);
+        const schoolResult = schools.find(
+          school => school.id === greatestAvg[0]
+        ).name;
+
+        return {
+          school: schoolResult,
+          avg: greatestAvg[1]
+        };
       };
 
       ///////////////////////////////////  CDN STUFF  ///////////////////////////////////////
