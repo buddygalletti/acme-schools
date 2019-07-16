@@ -172,6 +172,7 @@
       const GET_STUDENTS_AT_SCHOOL = 'GET_STUDENTS_AT_SCHOOL';
       const ADD_STUDENT = 'ADD_STUDENT';
       const DESTROY_STUDENT = 'DESTROY_STUDENT';
+      const DESTROY_STUDENT_AT_SCHOOL = 'DESTROY_STUDENT_AT_SCHOOL';
       const UPDATE_STUDENT = 'UPDATE_STUDENT';
 
       // action creators
@@ -206,6 +207,13 @@
       const _destroyStudent = id => {
         return {
           type: DESTROY_STUDENT,
+          id
+        };
+      };
+
+      const _destroyStudentAtSchool = id => {
+        return {
+          type: DESTROY_STUDENT_AT_SCHOOL,
           id
         };
       };
@@ -269,6 +277,13 @@
         };
       };
 
+      const destroyStudentAtSchool = id => {
+        return async dispatch => {
+          const response = await axios.delete(`/api/students/${id}`);
+          dispatch(_destroyStudentAtSchool(response.data));
+        };
+      };
+
       const updateStudent = (studentId, schoolId) => {
         return async dispatch => {
           const response = await axios.put(
@@ -304,6 +319,14 @@
             return {
               ...state,
               students: studentsAfterDelete
+            };
+          case DESTROY_STUDENT_AT_SCHOOL:
+            const studentsAtSchoolAfterDelete = state.studentsAtSchool.filter(
+              student => action.id !== student.id
+            );
+            return {
+              ...state,
+              studentsAtSchool: studentsAtSchoolAfterDelete
             };
           case UPDATE_STUDENT:
             const students = state.students.map(student => {
@@ -665,7 +688,7 @@
             allStudents,
             students,
             schools,
-            destroyStudent,
+            destroyStudentAtSchool,
             updateStudent,
             match
           } = this.props;
@@ -715,7 +738,9 @@
                         ))}
                       </select>
                       <br />
-                      <button onClick={() => destroyStudent(student.id)}>
+                      <button
+                        onClick={() => destroyStudentAtSchool(student.id)}
+                      >
                         Destroy Student
                       </button>
                     </div>
@@ -740,7 +765,8 @@
               dispatch(updateStudent(studentId, schoolId)),
             loadStudentsAtSchool: schoolId =>
               dispatch(getStudentsAtSchool(schoolId)),
-            destroyStudent: studentId => dispatch(destroyStudent(studentId)),
+            destroyStudentAtSchool: studentId =>
+              dispatch(destroyStudentAtSchool(studentId)),
             loadSchools: () => dispatch(getSchools())
           };
         }
