@@ -34,10 +34,11 @@ router.post('/', async (req, res, next) => {
         lastName: req.body.lastName,
         email: req.body.email,
         gpa: req.body.gpa,
-        schoolId: req.body.schoolId
+        schoolId: null || req.body.schoolId
       }
     });
     if (!wasCreated) {
+      res.sendStatus(204);
     }
     student.save();
     res.send(student);

@@ -323,7 +323,7 @@
               </NavLink>
             </span>
             <NavLink to="/schools" exact activeStyle={activeStyle}>
-              Schools ({schools.length})
+              Schools ({schools.length - 1})
             </NavLink>
             <NavLink to="/students" activeStyle={activeStyle}>
               Students ({students.length})
@@ -385,7 +385,6 @@
         handleSave(ev) {
           ev.preventDefault();
           this.props.addStudent(this.props.student);
-          this.props.location.hash = `/schools/${this.props.student.schoolId}`;
         }
         handleSelect(ev) {
           this.props.student.schoolId = ev.target.value;
@@ -426,8 +425,12 @@
                   />
                   <br />
                   Enroll at &rarr;{' '}
-                  <select value={this.props.schoolId} onChange={handleSelect}>
-                    <option>-- Not Enrolled --</option>
+                  <select
+                    required
+                    aria-required="true"
+                    value={this.props.schoolId}
+                    onChange={handleSelect}
+                  >
                     {this.props.schools.map(school => (
                       <option key={school.id} value={school.id}>
                         {school.name}
@@ -499,7 +502,6 @@
                         updateStudent(student.id, ev.target.value)
                       }
                     >
-                      <option>Not Enrolled</option>
                       {schools.map(school => (
                         <option key={school.name} value={school.id}>
                           {school.name}
@@ -526,7 +528,7 @@
         },
         dispatch => {
           return {
-            destroyStudent: student => dispatch(destroyStudent(student)),
+            destroyStudent: studentId => dispatch(destroyStudent(studentId)),
             updateStudent: (studentId, schoolId) =>
               dispatch(updateStudent(studentId, schoolId))
           };
@@ -544,36 +546,40 @@
           return (
             <div id="all-schools">
               {schools.map(school => {
-                return (
-                  <div className="school-card" key={school.id}>
-                    <h5>
-                      <Link to={`/schools/${school.id}`}>{school.name}</Link>
-                    </h5>
-                    <img src={school.imageUrl} />
-                    <br />
-                    <p>
-                      Student Count:{' '}
-                      {count(school.id, students)
-                        ? count(school.id, students)
-                        : 0}
-                    </p>
-                    <select
-                      onChange={ev => updateStudent(ev.target.value, school.id)}
-                    >
-                      <option defaultValue>-- Add Student --</option>
-                      {students.map(student => {
-                        if (student.schoolId !== school.id) {
-                          return (
-                            <option key={student.id} value={student.id}>
-                              {`${student.firstName} ${student.lastName}`}
-                            </option>
-                          );
+                if (school.name !== '-- Not Enrolled --') {
+                  return (
+                    <div className="school-card" key={school.id}>
+                      <h5>
+                        <Link to={`/schools/${school.id}`}>{school.name}</Link>
+                      </h5>
+                      <img src={school.imageUrl} />
+                      <br />
+                      <p>
+                        Student Count:{' '}
+                        {count(school.id, students)
+                          ? count(school.id, students)
+                          : 0}
+                      </p>
+                      <select
+                        onChange={ev =>
+                          updateStudent(ev.target.value, school.id)
                         }
-                      })}
-                    </select>
-                    <br />
-                  </div>
-                );
+                      >
+                        <option defaultValue>-- Add Student --</option>
+                        {students.map(student => {
+                          if (student.schoolId !== school.id) {
+                            return (
+                              <option key={student.id} value={student.id}>
+                                {`${student.firstName} ${student.lastName}`}
+                              </option>
+                            );
+                          }
+                        })}
+                      </select>
+                      <br />
+                    </div>
+                  );
+                }
               })}
             </div>
           );
@@ -598,22 +604,63 @@
       class _SingleSchool extends React.Component {
         constructor(props) {
           super(props);
+          this.state = {
+            loading: true
+          };
         }
-        componentDidMount() {
-          this.props.loadStudentsAtSchool(this.props.match.params.id);
+        async componentDidMount() {
+          await this.props.loadSchools();
+          await this.props.loadStudentsAtSchool(this.props.match.params.id);
+          this.setState({ loading: false });
         }
         render() {
+          if (this.state.loading) {
+            return <div />;
+          }
+          const {
+            students,
+            schools,
+            destroyStudent,
+            updateStudent,
+            match
+          } = this.props;
+          const school = schools.find(school => school.id === match.params.id);
+          const imageUrl = school.imageUrl;
           console.log(this.props);
-          const { students, schools, destroyStudent, match } = this.props;
-          // const school = schools.find(school => school.id === match.params.id);
-
-          // const imageUrl = school.imageUrl;
-
           return (
             <div className="all-students">
-              <p>
-                Hello, I need to be student cards. Not just stupid fucking text.
-              </p>
+              {students.map(student => {
+                return (
+                  // need to change this to StudentCard component maybe
+                  <div className="student-card" key={student.id}>
+                    <h5>{`${student.firstName} ${student.lastName}`}</h5>
+                    <img src={imageUrl} />
+                    <br />
+                    <p>
+                      GPA:{' '}
+                      {parseFloat(Math.round(student.gpa * 100) / 100).toFixed(
+                        2
+                      )}
+                    </p>
+                    <select
+                      defaultValue={school.id}
+                      onChange={ev =>
+                        updateStudent(student.id, ev.target.value)
+                      }
+                    >
+                      {schools.map(school => (
+                        <option key={school.name} value={school.id}>
+                          {school.name}
+                        </option>
+                      ))}
+                    </select>
+                    <br />
+                    <button onClick={() => destroyStudent(student.id)}>
+                      Destroy Student
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           );
         }
@@ -631,7 +678,8 @@
               dispatch(updateStudent(studentId, schoolId)),
             loadStudentsAtSchool: schoolId =>
               dispatch(getStudentsAtSchool(schoolId)),
-            destroyStudent: student => dispatch(destroyStudent(student))
+            destroyStudent: studentId => dispatch(destroyStudent(studentId)),
+            loadSchools: () => dispatch(getSchools())
           };
         }
       )(_SingleSchool);

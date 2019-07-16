@@ -62,6 +62,10 @@ const sampleStudents = [
 
 const sampleSchools = [
   {
+    name: '-- Not Enrolled --',
+    imageUrl: ''
+  },
+  {
     name: 'Cal Poly SLO',
     imageUrl: 'https://via.placeholder.com/140x100'
   },
@@ -87,7 +91,14 @@ const sampleSchools = [
 const syncAndSeed = async () => {
   try {
     await db.sync({ force: true });
-    const [calpoly, harvard, yale, brown, columbia] = await Promise.all(
+    const [
+      notEnrolled,
+      calpoly,
+      harvard,
+      yale,
+      brown,
+      columbia
+    ] = await Promise.all(
       sampleSchools.map(school => {
         return School.create(school);
       })
