@@ -174,6 +174,7 @@
       const DESTROY_STUDENT = 'DESTROY_STUDENT';
       const DESTROY_STUDENT_AT_SCHOOL = 'DESTROY_STUDENT_AT_SCHOOL';
       const UPDATE_STUDENT = 'UPDATE_STUDENT';
+      const UPDATE_STUDENT_AT_SCHOOL = 'UPDATE_STUDENT_AT_SCHOOL';
 
       // action creators
       const _getSchools = schools => {
@@ -221,6 +222,14 @@
       const _updateStudent = student => {
         return {
           type: UPDATE_STUDENT,
+          studentId: student.id,
+          newSchoolId: student.schoolId
+        };
+      };
+
+      const _updateStudentAtSchool = student => {
+        return {
+          type: UPDATE_STUDENT_AT_SCHOOL,
           studentId: student.id,
           newSchoolId: student.schoolId
         };
@@ -294,6 +303,16 @@
         };
       };
 
+      const updateStudentAtSchool = (studentId, schoolId) => {
+        return async dispatch => {
+          const response = await axios.put(
+            `/api/students/${studentId}`,
+            schoolId
+          );
+          dispatch(_updateStudentAtSchool(response.data));
+        };
+      };
+
       // main reducer, think about using combine reducer later
       const reducer = (state = initialState, action) => {
         switch (action.type) {
@@ -337,6 +356,15 @@
               }
             });
             return { ...state, students };
+          case UPDATE_STUDENT_AT_SCHOOL:
+            const studentsAtSchool = state.students.map(student => {
+              if (student.id === action.studentId) {
+                return { ...student, schoolId: action.newSchoolId };
+              } else {
+                return student;
+              }
+            });
+            return { ...state, studentsAtSchool };
           case GET_STUDENTS_AT_SCHOOL:
             return {
               ...state,
@@ -689,7 +717,7 @@
             students,
             schools,
             destroyStudentAtSchool,
-            updateStudent,
+            updateStudentAtSchool,
             match
           } = this.props;
           const school = schools.find(school => school.id === match.params.id);
@@ -697,7 +725,9 @@
             <div>
               <div>
                 <select
-                  onChange={ev => updateStudent(ev.target.value, school.id)}
+                  onChange={ev =>
+                    updateStudentAtSchool(ev.target.value, school.id)
+                  }
                 >
                   <option defaultValue>-- Add Student --</option>
                   {allStudents.map(student => {
@@ -761,8 +791,8 @@
         },
         dispatch => {
           return {
-            updateStudent: (studentId, schoolId) =>
-              dispatch(updateStudent(studentId, schoolId)),
+            updateStudentAtSchool: (studentId, schoolId) =>
+              dispatch(updateStudentAtSchool(studentId, schoolId)),
             loadStudentsAtSchool: schoolId =>
               dispatch(getStudentsAtSchool(schoolId)),
             destroyStudentAtSchool: studentId =>
