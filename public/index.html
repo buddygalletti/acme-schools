@@ -119,15 +119,15 @@
         return countsById[schoolId];
       };
 
-      const highestAvgGPA = (students = [], schools = []) => {
+      const highestAvgGPA = (students, schools) => {
         const totalsById = {};
         for (let i = 0; i < students.length; i++) {
           let student = students[i];
           let keys = Object.keys(totalsById);
           if (keys.includes(student.schoolId.toString())) {
-            totalsById[student.schoolId] += student.gpa;
+            totalsById[student.schoolId] += Number(student.gpa);
           } else {
-            totalsById[student.schoolId] = student.gpa;
+            totalsById[student.schoolId] = Number(student.gpa);
           }
         }
         const totalPairedWithId = Object.entries(totalsById);
@@ -144,11 +144,15 @@
           }
           return acc;
         }, []);
-        const schoolResult = schools.find(
-          school => school.id === greatestAvg[0]
-        ).name;
+        const schoolResult = schools.reduce((acc, school) => {
+          if (school.id === greatestAvg[0]) {
+            return acc + school.name;
+          }
+          return acc;
+        }, '');
 
         return {
+          id: greatestAvg[0],
           school: schoolResult,
           avg: greatestAvg[1]
         };
@@ -326,8 +330,10 @@
       /////////////////////////////////////  START REACT  /////////////////////////////////////
 
       const _NavBar = props => {
-        const { schools, students, mostPopular } = props;
+        const { schools, students, mostPopular, highestAvgGPA } = props;
         const mostPopularStats = mostPopular(students, schools);
+        const avgGPAInfo = highestAvgGPA(students, schools);
+
         const activeStyle = {
           fontWeight: 'bold',
           color: 'white',
@@ -360,6 +366,9 @@
               Most Popular {mostPopularStats.mostPopularName} (
               {mostPopularStats.max})
             </NavLink>
+            <NavLink to={`/schools/${avgGPAInfo.id}`} activeStyle={activeStyle}>
+              Top School {avgGPAInfo.school} ({avgGPAInfo.avg})
+            </NavLink>
           </div>
         );
       };
@@ -367,7 +376,8 @@
         return {
           schools: state.schools,
           students: state.students,
-          mostPopular: mostPopularSchool
+          mostPopular: mostPopularSchool,
+          highestAvgGPA
         };
       })(_NavBar);
 
