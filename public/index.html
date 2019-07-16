@@ -358,14 +358,20 @@
             });
             return { ...state, students };
           case UPDATE_STUDENT_AT_SCHOOL:
-            const studentsAtSchool = state.students.map(student => {
+            let newStudentsAtSchool;
+            const updatedStudents = state.students.map(student => {
               if (student.id === action.studentId) {
+                newStudentsAtSchool = [...state.studentsAtSchool, student];
                 return { ...student, schoolId: action.newSchoolId };
               } else {
                 return student;
               }
             });
-            return { ...state, studentsAtSchool };
+            return {
+              ...state,
+              students: updatedStudents,
+              studentsAtSchool: newStudentsAtSchool
+            };
           case GET_STUDENTS_AT_SCHOOL:
             return {
               ...state,
