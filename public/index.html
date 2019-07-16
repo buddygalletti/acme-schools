@@ -618,6 +618,7 @@
             return <div />;
           }
           const {
+            allStudents,
             students,
             schools,
             destroyStudent,
@@ -625,42 +626,58 @@
             match
           } = this.props;
           const school = schools.find(school => school.id === match.params.id);
-          const imageUrl = school.imageUrl;
-          console.log(this.props);
           return (
-            <div className="all-students">
-              {students.map(student => {
-                return (
-                  // need to change this to StudentCard component maybe
-                  <div className="student-card" key={student.id}>
-                    <h5>{`${student.firstName} ${student.lastName}`}</h5>
-                    <img src={imageUrl} />
-                    <br />
-                    <p>
-                      GPA:{' '}
-                      {parseFloat(Math.round(student.gpa * 100) / 100).toFixed(
-                        2
-                      )}
-                    </p>
-                    <select
-                      defaultValue={school.id}
-                      onChange={ev =>
-                        updateStudent(student.id, ev.target.value)
-                      }
-                    >
-                      {schools.map(school => (
-                        <option key={school.name} value={school.id}>
-                          {school.name}
+            <div>
+              <div>
+                <select
+                  onChange={ev => updateStudent(ev.target.value, school.id)}
+                >
+                  <option defaultValue>-- Add Student --</option>
+                  {allStudents.map(student => {
+                    if (student.schoolId !== school.id) {
+                      return (
+                        <option key={student.id} value={student.id}>
+                          {`${student.firstName} ${student.lastName}`}
                         </option>
-                      ))}
-                    </select>
-                    <br />
-                    <button onClick={() => destroyStudent(student.id)}>
-                      Destroy Student
-                    </button>
-                  </div>
-                );
-              })}
+                      );
+                    }
+                  })}
+                </select>
+              </div>
+              <div className="all-students">
+                {students.map(student => {
+                  return (
+                    // need to change this to StudentCard component maybe
+                    <div className="student-card" key={student.id}>
+                      <h5>{`${student.firstName} ${student.lastName}`}</h5>
+                      <img src={school.imageUrl} />
+                      <br />
+                      <p>
+                        GPA:{' '}
+                        {parseFloat(
+                          Math.round(student.gpa * 100) / 100
+                        ).toFixed(2)}
+                      </p>
+                      <select
+                        defaultValue={school.id}
+                        onChange={ev =>
+                          updateStudent(student.id, ev.target.value)
+                        }
+                      >
+                        {schools.map(school => (
+                          <option key={school.name} value={school.id}>
+                            {school.name}
+                          </option>
+                        ))}
+                      </select>
+                      <br />
+                      <button onClick={() => destroyStudent(student.id)}>
+                        Destroy Student
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
         }
@@ -669,7 +686,8 @@
         state => {
           return {
             students: state.studentsAtSchool,
-            schools: state.schools
+            schools: state.schools,
+            allStudents: state.students
           };
         },
         dispatch => {
