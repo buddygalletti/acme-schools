@@ -367,6 +367,7 @@
                 return student;
               }
             });
+            console.log(updatedStudents);
             return {
               ...state,
               students: updatedStudents,
@@ -725,6 +726,7 @@
             schools,
             destroyStudentAtSchool,
             updateStudentAtSchool,
+            updateStudent,
             match
           } = this.props;
           const school = schools.find(school => school.id === match.params.id);
@@ -798,6 +800,8 @@
         },
         dispatch => {
           return {
+            updateStudent: (studentId, schoolId) =>
+              dispatch(updateStudent(studentId, schoolId)),
             updateStudentAtSchool: (studentId, schoolId) =>
               dispatch(updateStudentAtSchool(studentId, schoolId)),
             loadStudentsAtSchool: schoolId =>
