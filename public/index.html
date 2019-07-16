@@ -367,7 +367,8 @@
               {mostPopularStats.max})
             </NavLink>
             <NavLink to={`/schools/${avgGPAInfo.id}`} activeStyle={activeStyle}>
-              Top School {avgGPAInfo.school} ({avgGPAInfo.avg})
+              Top School {avgGPAInfo.school} (
+              {parseFloat(Math.round(avgGPAInfo.avg * 100) / 100).toFixed(2)})
             </NavLink>
           </div>
         );
@@ -382,8 +383,9 @@
       })(_NavBar);
 
       const _Home = props => {
-        const { schools, students, mostPopular } = props;
+        const { schools, students, mostPopular, highestAvgGPA } = props;
         const mostPopularStats = mostPopular(students, schools);
+        const avgGPAInfo = highestAvgGPA(students, schools);
 
         return (
           <div id="home-container">
@@ -395,6 +397,12 @@
               </Link>{' '}
               with {mostPopularStats.max} students.
             </p>
+            <p>
+              Our top performing school is{' '}
+              <Link to={`/schools/${avgGPAInfo.id}`}>{avgGPAInfo.school}</Link>{' '}
+              with an average GPA of{' '}
+              {parseFloat(Math.round(avgGPAInfo.avg * 100) / 100).toFixed(2)}.
+            </p>
           </div>
         );
       };
@@ -402,7 +410,8 @@
         return {
           schools: state.schools,
           students: state.students,
-          mostPopular: mostPopularSchool
+          mostPopular: mostPopularSchool,
+          highestAvgGPA
         };
       })(_Home);
 
