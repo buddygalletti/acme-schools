@@ -18,7 +18,7 @@
         color: white;
         margin-right: 20px;
       }
-      #addStudentForm {
+      #add-student-form {
         display: flex;
         justify-content: center;
         margin-top: 2em;
@@ -27,15 +27,15 @@
       #home-container {
         padding: 1.5em;
       }
-      #allStudents,
-      #allSchools {
+      .all-students,
+      #all-schools {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-around;
       }
-      .studentCard,
-      .schoolCard {
+      .student-card,
+      .school-card {
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -140,6 +140,7 @@
       // define some constants here
       const GET_SCHOOLS = 'GET_SCHOOLS';
       const GET_STUDENTS = 'GET_STUDENTS';
+      const GET_STUDENTS_AT_SCHOOL = 'GET_STUDENTS_AT_SCHOOL';
       const ADD_STUDENT = 'ADD_STUDENT';
       const DESTROY_STUDENT = 'DESTROY_STUDENT';
       const UPDATE_STUDENT = 'UPDATE_STUDENT';
@@ -155,6 +156,13 @@
       const _getStudents = students => {
         return {
           type: GET_STUDENTS,
+          students
+        };
+      };
+
+      const _getStudentsAtSchool = students => {
+        return {
+          type: GET_STUDENTS_AT_SCHOOL,
           students
         };
       };
@@ -192,7 +200,8 @@
           email: '',
           gpa: 0.0,
           schoolId: null
-        }
+        },
+        studentsAtSchool: []
       };
 
       // thunks
@@ -207,6 +216,13 @@
         return async dispatch => {
           const response = await axios.get('/api/students/');
           dispatch(_getStudents(response.data));
+        };
+      };
+
+      const getStudentsAtSchool = id => {
+        return async dispatch => {
+          const response = await axios.get(`/api/schools/${id}`);
+          dispatch(_getStudentsAtSchool(response.data));
         };
       };
 
@@ -269,6 +285,11 @@
               }
             });
             return { ...state, students };
+          case GET_STUDENTS_AT_SCHOOL:
+            return {
+              ...state,
+              studentsAtSchool: action.students
+            };
           default:
             return state;
         }
@@ -278,7 +299,7 @@
       const store = createStore(reducer, applyMiddleware(ReduxThunk.default));
 
       /////////////////////////////////////  START REACT  /////////////////////////////////////
-      // time for react
+
       const _NavBar = props => {
         const { schools, students, mostPopular } = props;
         const mostPopularStats = mostPopular(students, schools);
@@ -301,14 +322,14 @@
                 ACME Schools
               </NavLink>
             </span>
-            <NavLink to="/schools" activeStyle={activeStyle}>
+            <NavLink to="/schools" exact activeStyle={activeStyle}>
               Schools ({schools.length})
             </NavLink>
             <NavLink to="/students" activeStyle={activeStyle}>
               Students ({students.length})
             </NavLink>
             <NavLink
-              to={`/students/${mostPopularStats.mostPopularId}`}
+              to={`/schools/${mostPopularStats.mostPopularId}`}
               activeStyle={activeStyle}
             >
               Most Popular {mostPopularStats.mostPopularName} (
@@ -374,7 +395,7 @@
           const { handleChange, handleSave, handleSelect } = this;
           return (
             <div id="form-container">
-              <div id="addStudentForm">
+              <div id="add-student-form">
                 <form onSubmit={handleSave}>
                   <label htmlFor="firstName">First name &rarr; </label>
                   <input
@@ -453,7 +474,7 @@
           } = this.props;
           let school;
           return (
-            <div id="allStudents">
+            <div className="all-students">
               {students.map(student => {
                 if (student.schoolId) {
                   school = schools.find(function(school) {
@@ -462,7 +483,7 @@
                 }
                 return (
                   // need to change this to StudentCard component maybe
-                  <div className="studentCard" key={student.id}>
+                  <div className="student-card" key={student.id}>
                     <h5>{`${student.firstName} ${student.lastName}`}</h5>
                     <img src={school.imageUrl} />
                     <br />
@@ -521,10 +542,10 @@
           const { students, schools, count, updateStudent } = this.props;
 
           return (
-            <div id="allSchools">
+            <div id="all-schools">
               {schools.map(school => {
                 return (
-                  <div className="schoolCard" key={school.id}>
+                  <div className="school-card" key={school.id}>
                     <h5>
                       <Link to={`/schools/${school.id}`}>{school.name}</Link>
                     </h5>
@@ -574,6 +595,47 @@
         }
       )(_Schools);
 
+      class _SingleSchool extends React.Component {
+        constructor(props) {
+          super(props);
+        }
+        componentDidMount() {
+          this.props.loadStudentsAtSchool(this.props.match.params.id);
+        }
+        render() {
+          console.log(this.props);
+          const { students, schools, destroyStudent, match } = this.props;
+          // const school = schools.find(school => school.id === match.params.id);
+
+          // const imageUrl = school.imageUrl;
+
+          return (
+            <div className="all-students">
+              <p>
+                Hello, I need to be student cards. Not just stupid fucking text.
+              </p>
+            </div>
+          );
+        }
+      }
+      const SingleSchool = connect(
+        state => {
+          return {
+            students: state.studentsAtSchool,
+            schools: state.schools
+          };
+        },
+        dispatch => {
+          return {
+            updateStudent: (studentId, schoolId) =>
+              dispatch(updateStudent(studentId, schoolId)),
+            loadStudentsAtSchool: schoolId =>
+              dispatch(getStudentsAtSchool(schoolId)),
+            destroyStudent: student => dispatch(destroyStudent(student))
+          };
+        }
+      )(_SingleSchool);
+
       /////////////////////////////////////  ROUTES && APP  /////////////////////////////////////
 
       class _Routes extends React.Component {
@@ -589,6 +651,7 @@
               <Route path="/home" component={Home} />
               <Route path="/students" exact component={Students} />
               <Route path="/schools" exact component={Schools} />
+              <Route path="/schools/:id" component={SingleSchool} />
             </HashRouter>
           );
         }
