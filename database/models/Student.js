@@ -24,6 +24,10 @@ const Student = db.define('student', {
   },
   gpa: {
     type: Sequelize.DECIMAL
+  },
+  password: {
+    type: Sequelize.STRING,
+    allowNull: false
   }
 });
 
